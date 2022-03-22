@@ -32,11 +32,11 @@ jobs:
 
 
       -
-        name: Docker meta for Template executor
-        id: meta_template_executor
+        name: Docker meta for Maven executor
+        id: meta_maven_executor
         uses: docker/metadata-action@v3
         with:
-          images: kubeshop/testkube-template-executor
+          images: lreimer/testkube-maven-executor
           tags: |
             type=ref,event=branch
             type=ref,event=pr
@@ -45,14 +45,13 @@ jobs:
             type=sha
 
       - 
-        name: Build Template Executor
+        name: Build Maven Executor
         uses: docker/bake-action@v1
         with:
           files: |
-            build/template-executor/docker-bake.hcl
-            ${{ steps.meta_template_executor.outputs.bake-file }}
+            build/agent/docker-bake.hcl
+            ${{ steps.meta_maven_executor.outputs.bake-file }}
           targets: build
-          set: build.args.TOKEN=${{ secrets.PERSONAL_ACCESS_TOKEN }}
           push: true
 
 

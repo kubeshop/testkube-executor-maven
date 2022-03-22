@@ -8,7 +8,7 @@ import (
 
 func NewRunner() *ExampleRunner {
 	return &ExampleRunner{
-		Fetcher: content.NewFetcher(),
+		Fetcher: content.NewFetcher(""),
 	}
 }
 
