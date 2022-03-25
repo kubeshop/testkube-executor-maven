@@ -3,7 +3,9 @@ module github.com/kubeshop/testkube-executor-maven
 go 1.17
 
 require (
+	github.com/joshdk/go-junit v0.0.0-20210226021600-6145f504ca0d
 	github.com/kubeshop/testkube v0.11.1
+	github.com/otiai10/copy v1.7.0
 	github.com/stretchr/testify v1.7.1
 )
 
