@@ -40,7 +40,7 @@ func TestRun(t *testing.T) {
 
 		// then
 		assert.NoError(t, err)
-		assert.Equal(t, result.Status, testkube.ExecutionStatusSuccess)
+		assert.Equal(t, result.Status, testkube.ExecutionStatusPassed)
 		assert.Len(t, result.Steps, 1)
 	})
 
@@ -70,7 +70,7 @@ func TestRun(t *testing.T) {
 
 		// then
 		assert.NoError(t, err)
-		assert.Equal(t, result.Status, testkube.ExecutionStatusSuccess)
+		assert.Equal(t, result.Status, testkube.ExecutionStatusPassed)
 		assert.Len(t, result.Steps, 1)
 	})
 }
@@ -106,7 +106,7 @@ func TestRunErrors(t *testing.T) {
 
 		// then
 		assert.NoError(t, err)
-		assert.Equal(t, result.Status, testkube.ExecutionStatusError)
+		assert.Equal(t, result.Status, testkube.ExecutionStatusFailed)
 	})
 
 	t.Run("no pom.xml", func(t *testing.T) {
@@ -134,7 +134,7 @@ func TestRunErrors(t *testing.T) {
 
 		// then
 		assert.NoError(t, err)
-		assert.Equal(t, result.Status, testkube.ExecutionStatusError)
+		assert.Equal(t, result.Status, testkube.ExecutionStatusFailed)
 		assert.Contains(t, result.ErrorMessage, "no")
 	})
 }

@@ -83,9 +83,9 @@ func (r *MavenRunner) Run(execution testkube.Execution) (result testkube.Executi
 	output, err := executor.Run(directory, mavenCommand, args...)
 
 	if err == nil {
-		result.Status = testkube.ExecutionStatusSuccess
+		result.Status = testkube.ExecutionStatusPassed
 	} else {
-		result.Status = testkube.ExecutionStatusError
+		result.Status = testkube.ExecutionStatusFailed
 		result.ErrorMessage = err.Error()
 		if strings.Contains(result.ErrorMessage, "exit status 1") {
 			// probably some tests have failed
@@ -125,8 +125,8 @@ func (r *MavenRunner) Run(execution testkube.Execution) (result testkube.Executi
 func mapStatus(in junit.Status) (out string) {
 	switch string(in) {
 	case "passed":
-		return string(testkube.SUCCESS_ExecutionStatus)
+		return string(testkube.PASSED_ExecutionStatus)
 	default:
-		return string(testkube.ERROR__ExecutionStatus)
+		return string(testkube.FAILED_ExecutionStatus)
 	}
 }
