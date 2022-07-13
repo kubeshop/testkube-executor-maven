@@ -79,6 +79,9 @@ func (r *MavenRunner) Run(execution testkube.Execution) (result testkube.Executi
 		args = append(args, goal)
 	}
 
+	// workaround for https://github.com/eclipse/che/issues/13926
+	os.Unsetenv("MAVEN_CONFIG")
+
 	output.PrintEvent("Running", directory, mavenCommand, args)
 	output, err := executor.Run(directory, mavenCommand, args...)
 
@@ -101,6 +104,9 @@ func (r *MavenRunner) Run(execution testkube.Execution) (result testkube.Executi
 
 	junitReportPath := filepath.Join(directory, "target", "surefire-reports")
 	err = filepath.Walk(junitReportPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
 		if !info.IsDir() && filepath.Ext(path) == ".xml" {
 			suites, _ := junit.IngestFile(path)
 			for _, suite := range suites {
