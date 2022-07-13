@@ -14,10 +14,10 @@ target "jdk11" {
   ]
 }
 
-target "jdk17" {
+target "jdk8" {
   inherits = ["docker-metadata-action"]
   context = "./"
-  dockerfile = "build/agent/Dockerfile.jdk17"
+  dockerfile = "build/agent/Dockerfile.jdk8"
   platforms = [
     "linux/amd64",
   ]
