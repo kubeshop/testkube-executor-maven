@@ -81,10 +81,10 @@ jobs:
           targets: jdk11
           push: true
 
-      # JDK 17
+      # JDK 8
 
-      - name: Docker meta for Maven executor JDK17
-        id: meta_maven_executor_jdk17
+      - name: Docker meta for Maven executor JDK8
+        id: meta_maven_executor_jdk8
         uses: docker/metadata-action@v3
         with:
           images: kubeshop/testkube-maven-executor
@@ -98,15 +98,15 @@ jobs:
           flavor: |
             latest=auto
             prefix=
-            suffix=-jdk17
+            suffix=-jdk8
 
-      - name: Build JDK17 Maven executor
+      - name: Build JDK8 Maven executor
         uses: docker/bake-action@v1
         with:
           files: |
             build/agent/docker-bake.hcl
-            ${{ steps.meta_maven_executor_jdk17.outputs.bake-file }}
-          targets: jdk17
+            ${{ steps.meta_maven_executor_jdk8.outputs.bake-file }}
+          targets: jdk8
           push: true
 
       # JDK 18
