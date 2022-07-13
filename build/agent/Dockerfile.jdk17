@@ -8,7 +8,7 @@ ENV GOOS=linux
 
 RUN cd cmd/agent;go build -o /runner -mod mod -a .
 
-FROM maven:3.8.4-jdk-11
+FROM maven:3.8.6-jdk-17
 COPY --from=builder /runner /bin/runner
 # do no overwrite the entrypoint
 CMD ["/bin/runner"]
