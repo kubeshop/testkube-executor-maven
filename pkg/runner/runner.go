@@ -14,8 +14,6 @@ import (
 	"github.com/kubeshop/testkube/pkg/executor/output"
 )
 
-const EnvPrefix = "RUNNER_"
-
 type Params struct {
 	Datadir string // RUNNER_DATADIR
 }
@@ -67,8 +65,8 @@ func (r *MavenRunner) Run(execution testkube.Execution) (result testkube.Executi
 	}
 
 	// simply set the ENVs to use during Maven execution
-	for key, value := range execution.Envs {
-		os.Setenv(EnvPrefix+key, value)
+	for _, env := range execution.Variables {
+		os.Setenv(env.Name, env.Value)
 	}
 
 	// pass additional executor arguments/flags to Gradle
