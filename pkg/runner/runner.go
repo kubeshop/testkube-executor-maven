@@ -73,9 +73,10 @@ func (r *MavenRunner) Run(execution testkube.Execution) (result testkube.Executi
 	args := []string{}
 	args = append(args, execution.Args...)
 
-	if !strings.EqualFold(execution.TestType, "maven/project") {
-		// then use the test subtype as goal or phase
-		goal := strings.Split(execution.TestType, "/")[1]
+	goal := strings.Split(execution.TestType, "/")[1]
+	if !strings.EqualFold(goal, "project") {
+		// use the test subtype as goal or phase when != project
+		// in case of project there is need to pass additional args
 		args = append(args, goal)
 	}
 
@@ -101,6 +102,9 @@ func (r *MavenRunner) Run(execution testkube.Execution) (result testkube.Executi
 
 	junitReportPath := filepath.Join(directory, "target", "surefire-reports")
 	err = filepath.Walk(junitReportPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
 		if !info.IsDir() && filepath.Ext(path) == ".xml" {
 			suites, _ := junit.IngestFile(path)
 			for _, suite := range suites {
@@ -119,7 +123,11 @@ func (r *MavenRunner) Run(execution testkube.Execution) (result testkube.Executi
 		return nil
 	})
 
-	return result, err
+	if err != nil {
+		return result.Err(err), nil
+	}
+
+	return result, nil
 }
 
 func mapStatus(in junit.Status) (out string) {
