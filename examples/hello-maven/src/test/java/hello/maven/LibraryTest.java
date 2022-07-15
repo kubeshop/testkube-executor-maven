@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class LibraryTest {
     @Test void runMavenTests() {
-        String env = System.getenv("RUNNER_ENV_TEST");
-        assertTrue(Boolean.parseBoolean(env), "RUNNER_ENV_TEST env should be true");
+        String env = System.getenv("TESTKUBE_MAVEN");
+        assertTrue(Boolean.parseBoolean(env), "TESTKUBE_MAVEN env should be true");
     }
 }
