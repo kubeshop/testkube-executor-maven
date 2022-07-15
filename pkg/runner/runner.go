@@ -49,7 +49,7 @@ func (r *MavenRunner) Run(execution testkube.Execution) (result testkube.Executi
 	}
 
 	// check that pom.xml file exists
-	directory := filepath.Join(r.params.Datadir, "repo")
+	directory := filepath.Join(r.params.Datadir, "repo", execution.Content.Repository.Path)
 	pomXml := filepath.Join(directory, "pom.xml")
 
 	_, pomXmlErr := os.Stat(pomXml)
