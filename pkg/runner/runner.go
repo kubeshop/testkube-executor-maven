@@ -47,7 +47,7 @@ func (r *MavenRunner) Run(execution testkube.Execution) (result testkube.Executi
 	}
 
 	// check that pom.xml file exists
-	directory := filepath.Join(r.params.Datadir, "repo")
+	directory := filepath.Join(r.params.Datadir, "repo", execution.Content.Repository.Path)
 	pomXml := filepath.Join(directory, "pom.xml")
 
 	_, pomXmlErr := os.Stat(pomXml)
@@ -65,17 +65,18 @@ func (r *MavenRunner) Run(execution testkube.Execution) (result testkube.Executi
 	}
 
 	// simply set the ENVs to use during Maven execution
-	for key, value := range execution.Envs {
-		os.Setenv(key, value)
+	for _, env := range execution.Variables {
+		os.Setenv(env.Name, env.Value)
 	}
 
 	// pass additional executor arguments/flags to Gradle
 	args := []string{}
 	args = append(args, execution.Args...)
 
-	if !strings.EqualFold(execution.TestType, "maven/project") {
-		// then use the test subtype as goal or phase
-		goal := strings.Split(execution.TestType, "/")[1]
+	goal := strings.Split(execution.TestType, "/")[1]
+	if !strings.EqualFold(goal, "project") {
+		// use the test subtype as goal or phase when != project
+		// in case of project there is need to pass additional args
 		args = append(args, goal)
 	}
 
@@ -125,7 +126,11 @@ func (r *MavenRunner) Run(execution testkube.Execution) (result testkube.Executi
 		return nil
 	})
 
-	return result, err
+	if err != nil {
+		return result.Err(err), nil
+	}
+
+	return result, nil
 }
 
 func mapStatus(in junit.Status) (out string) {
