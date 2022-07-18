@@ -13,6 +13,40 @@ import (
 
 func TestRun(t *testing.T) {
 
+	t.Run("run maven wrapper test goal with envs", func(t *testing.T) {
+		// setup
+		tempDir, _ := os.MkdirTemp("", "*")
+		os.Setenv("RUNNER_DATADIR", tempDir)
+		repoDir := filepath.Join(tempDir, "repo")
+		os.Mkdir(repoDir, 0755)
+		_ = cp.Copy("../../examples/hello-mvnw", repoDir)
+
+		// given
+		runner := NewRunner()
+
+		execution := testkube.NewQueuedExecution()
+		execution.TestType = "maven/test"
+		execution.Content = &testkube.TestContent{
+			Type_: string(testkube.TestContentTypeGitDir),
+			Repository: &testkube.Repository{
+				Uri:    "someuri",
+				Branch: "main",
+			},
+		}
+
+		execution.Variables = map[string]testkube.Variable{
+			"wrapper": {Name: "TESTKUBE_MAVEN_WRAPPER", Value: "true"},
+		}
+
+		// when
+		result, err := runner.Run(*execution)
+
+		// then
+		assert.NoError(t, err)
+		assert.Equal(t, testkube.ExecutionStatusPassed, result.Status)
+		assert.Len(t, result.Steps, 1)
+	})
+
 	t.Run("run maven project with test task and envs", func(t *testing.T) {
 		// setup
 		tempDir, _ := os.MkdirTemp("", "*")
@@ -28,19 +62,21 @@ func TestRun(t *testing.T) {
 		execution.Content = &testkube.TestContent{
 			Type_: string(testkube.TestContentTypeGitDir),
 			Repository: &testkube.Repository{
-				Uri:    "https://github.com/lreimer/hands-on-testkube.git",
+				Uri:    "someur",
 				Branch: "main",
 			},
 		}
 		execution.Args = []string{"test"}
-		execution.Envs = map[string]string{"TESTKUBE_MAVEN": "true"}
+		execution.Variables = map[string]testkube.Variable{
+			"wrapper": {Name: "TESTKUBE_MAVEN", Value: "true"},
+		}
 
 		// when
 		result, err := runner.Run(*execution)
 
 		// then
 		assert.NoError(t, err)
-		assert.Equal(t, result.Status, testkube.ExecutionStatusPassed)
+		assert.Equal(t, testkube.ExecutionStatusPassed, result.Status)
 		assert.Len(t, result.Steps, 1)
 	})
 
@@ -70,7 +106,7 @@ func TestRun(t *testing.T) {
 
 		// then
 		assert.NoError(t, err)
-		assert.Equal(t, result.Status, testkube.ExecutionStatusPassed)
+		assert.Equal(t, testkube.ExecutionStatusPassed, result.Status)
 		assert.Len(t, result.Steps, 1)
 	})
 }
