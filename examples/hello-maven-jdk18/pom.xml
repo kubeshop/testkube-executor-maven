@@ -45,7 +45,6 @@
                     <source>${java.version}</source>
                     <target>${java.version}</target>
                     <release>${java.version}</release>
-                    <test></test
                 </configuration>
             </plugin>
 
