@@ -10,5 +10,8 @@ RUN cd cmd/agent;go build -o /runner -mod mod -a .
 
 FROM maven:3.8.6-openjdk-18
 COPY --from=builder /runner /bin/runner
+
+USER 1001
+
 # do no overwrite the entrypoint
 CMD ["/bin/runner"]
