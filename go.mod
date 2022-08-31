@@ -1,6 +1,6 @@
 module github.com/kubeshop/testkube-executor-maven
 
-go 1.17
+go 1.18
 
 require (
 	github.com/joshdk/go-junit v0.0.0-20210226021600-6145f504ca0d
