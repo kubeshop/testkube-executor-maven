@@ -35,7 +35,7 @@ func TestRun(t *testing.T) {
 		}
 
 		execution.Variables = map[string]testkube.Variable{
-			"wrapper": {Name: "TESTKUBE_MAVEN_WRAPPER", Value: "true"},
+			"wrapper": {Name: "TESTKUBE_MAVEN_WRAPPER", Value: "true", Type_: testkube.VariableTypeBasic},
 		}
 
 		// when
@@ -68,7 +68,7 @@ func TestRun(t *testing.T) {
 		}
 		execution.Args = []string{"test"}
 		execution.Variables = map[string]testkube.Variable{
-			"wrapper": {Name: "TESTKUBE_MAVEN", Value: "true"},
+			"wrapper": {Name: "TESTKUBE_MAVEN", Value: "true", Type_: testkube.VariableTypeBasic},
 		}
 
 		// when

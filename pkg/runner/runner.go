@@ -12,6 +12,7 @@ import (
 	"github.com/kubeshop/testkube/pkg/api/v1/testkube"
 	"github.com/kubeshop/testkube/pkg/executor"
 	"github.com/kubeshop/testkube/pkg/executor/output"
+	"github.com/kubeshop/testkube/pkg/executor/secret"
 )
 
 type Params struct {
@@ -64,6 +65,7 @@ func (r *MavenRunner) Run(execution testkube.Execution) (result testkube.Executi
 		mavenCommand = "./mvnw"
 	}
 
+	secret.NewEnvManager().GetVars(execution.Variables)
 	// simply set the ENVs to use during Maven execution
 	for _, env := range execution.Variables {
 		os.Setenv(env.Name, env.Value)
