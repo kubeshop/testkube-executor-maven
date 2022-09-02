@@ -75,6 +75,14 @@ func (r *MavenRunner) Run(execution testkube.Execution) (result testkube.Executi
 	args := []string{}
 	args = append(args, execution.Args...)
 
+	settingsXML, err := createSettingsXML(directory, execution.VariablesFile)
+	if err != nil {
+		return result.Err(fmt.Errorf("could not create settings.xml")), nil
+	}
+	if settingsXML != "" {
+		args = append(args, "--settings", settingsXML)
+	}
+
 	goal := strings.Split(execution.TestType, "/")[1]
 	if !strings.EqualFold(goal, "project") {
 		// use the test subtype as goal or phase when != project
@@ -142,4 +150,19 @@ func mapStatus(in junit.Status) (out string) {
 	default:
 		return string(testkube.FAILED_ExecutionStatus)
 	}
+}
+
+// createSettingsXML saves the settings.xml to maven config folder and adds it to the list of arguments
+func createSettingsXML(directory string, content string) (string, error) {
+	if content == "" {
+		return "", nil
+	}
+
+	settingsXML := filepath.Join(directory, "settings.xml")
+	err := os.WriteFile(settingsXML, []byte(content), 0644)
+	if err != nil {
+		return "", fmt.Errorf("could not create settings.xml: %w", err)
+	}
+
+	return settingsXML, nil
 }
