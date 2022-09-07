@@ -1,6 +1,7 @@
 package runner
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -100,6 +101,41 @@ func TestRun(t *testing.T) {
 			},
 		}
 		execution.Envs = map[string]string{"TESTKUBE_MAVEN_WRAPPER": "true"}
+
+		// when
+		result, err := runner.Run(*execution)
+
+		// then
+		assert.NoError(t, err)
+		assert.Equal(t, testkube.ExecutionStatusPassed, result.Status)
+		assert.Len(t, result.Steps, 1)
+	})
+
+	t.Run("run maven project with settings.xml", func(t *testing.T) {
+		// setup
+		tempDir, _ := os.MkdirTemp("", "*")
+		os.Setenv("RUNNER_DATADIR", tempDir)
+		repoDir := filepath.Join(tempDir, "repo")
+		os.Mkdir(repoDir, 0755)
+		_ = cp.Copy("../../examples/hello-maven-settings", repoDir)
+
+		// given
+		runner := NewRunner()
+		execution := testkube.NewQueuedExecution()
+		execution.TestType = "maven/test"
+		execution.Content = &testkube.TestContent{
+			Type_: string(testkube.TestContentTypeGitDir),
+			Repository: &testkube.Repository{
+				Uri:    "someuri",
+				Branch: "main",
+			},
+		}
+		execution.Variables = map[string]testkube.Variable{
+			"wrapper": {Name: "TESTKUBE_MAVEN", Value: "true", Type_: testkube.VariableTypeBasic},
+		}
+		settingsContent, err := os.ReadFile(fmt.Sprintf("%s/settings.xml", repoDir))
+		assert.NoError(t, err)
+		execution.VariablesFile = string(settingsContent)
 
 		// when
 		result, err := runner.Run(*execution)
