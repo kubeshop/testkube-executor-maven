@@ -53,7 +53,7 @@ jobs:
   alljdks:
     strategy:
       matrix:
-        version: [jdk8, jdk11, jdk18]
+        version: [jdk8, jdk11, jdk17, jdk18]
 
     runs-on: ubuntu-latest
     steps:
