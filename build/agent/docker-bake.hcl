@@ -1,7 +1,7 @@
 target "docker-metadata-action" {}
 
 group "default" {
-    targets = ["jdk11","jdk8","jdk18"]
+    targets = ["jdk11","jdk8","jdk18","jdk17"]
 }
 
 
@@ -28,6 +28,15 @@ target "jdk18" {
   inherits = ["docker-metadata-action"]
   context = "./"
   dockerfile = "build/agent/Dockerfile.jdk18"
+  platforms = [
+    "linux/amd64",
+  ]
+}
+
+target "jdk17" {
+  inherits = ["docker-metadata-action"]
+  context = "./"
+  dockerfile = "build/agent/Dockerfile.jdk17"
   platforms = [
     "linux/amd64",
   ]
