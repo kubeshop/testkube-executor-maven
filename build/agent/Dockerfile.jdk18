@@ -11,6 +11,7 @@ RUN cd cmd/agent;go build -o /runner -mod mod -a .
 FROM maven:3.8.6-openjdk-18
 COPY --from=builder /runner /bin/runner
 
+RUN mkdir -m 777 -p /data
 USER 1001
 
 # do no overwrite the entrypoint
