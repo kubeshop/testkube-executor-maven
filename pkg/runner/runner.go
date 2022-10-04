@@ -72,7 +72,8 @@ func (r *MavenRunner) Run(execution testkube.Execution) (result testkube.Executi
 		mavenCommand = "./mvnw"
 	}
 
-	secret.NewEnvManager().GetVars(execution.Variables)
+	envManager := secret.NewEnvManagerWithVars(execution.Variables)
+	envManager.GetVars(execution.Variables)
 	// simply set the ENVs to use during Maven execution
 	for _, env := range execution.Variables {
 		os.Setenv(env.Name, env.Value)
@@ -101,7 +102,8 @@ func (r *MavenRunner) Run(execution testkube.Execution) (result testkube.Executi
 	os.Unsetenv("MAVEN_CONFIG")
 
 	output.PrintEvent("Running", directory, mavenCommand, args)
-	output, err := executor.Run(directory, mavenCommand, args...)
+	output, err := executor.Run(directory, mavenCommand, envManager, args...)
+	output = envManager.Obfuscate(output)
 
 	if err == nil {
 		result.Status = testkube.ExecutionStatusPassed
