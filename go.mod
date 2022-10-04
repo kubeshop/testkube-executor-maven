@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/joshdk/go-junit v0.0.0-20210226021600-6145f504ca0d
-	github.com/kubeshop/testkube v1.5.35
+	github.com/kubeshop/testkube v1.5.45
 	github.com/otiai10/copy v1.7.0
 	github.com/stretchr/testify v1.8.0
 )
