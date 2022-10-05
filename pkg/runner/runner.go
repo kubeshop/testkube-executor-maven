@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/user"
 	"path/filepath"
 	"strings"
 
@@ -100,7 +101,11 @@ func (r *MavenRunner) Run(execution testkube.Execution) (result testkube.Executi
 	// workaround for https://github.com/eclipse/che/issues/13926
 	os.Unsetenv("MAVEN_CONFIG")
 
-	args = append(args, "-Duser.home=/home/maven")
+	currentUser, err := user.Current()
+	if err == nil && currentUser.Name == "maven" {
+		args = append(args, "-Duser.home=/home/maven")
+	}
+
 	output.PrintEvent("Running", directory, mavenCommand, args)
 	output, err := executor.Run(directory, mavenCommand, args...)
 
