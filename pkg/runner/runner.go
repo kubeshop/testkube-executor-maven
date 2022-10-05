@@ -100,6 +100,7 @@ func (r *MavenRunner) Run(execution testkube.Execution) (result testkube.Executi
 	// workaround for https://github.com/eclipse/che/issues/13926
 	os.Unsetenv("MAVEN_CONFIG")
 
+	args = append(args, "-Duser.home=/home/maven")
 	output.PrintEvent("Running", directory, mavenCommand, args)
 	output, err := executor.Run(directory, mavenCommand, args...)
 
