@@ -170,8 +170,8 @@ func TestRun(t *testing.T) {
 		}
 		fileContent, err := os.ReadFile(fmt.Sprintf("%s/settings.xml", repoDir))
 		assert.NoError(t, err)
-		execution.CopyFiles = map[string][]byte{
-			"/tmp/settings.xml": fileContent,
+		execution.CopyFiles = map[string]string{
+			"/tmp/settings.xml": string(fileContent),
 		}
 		execution.Args = append(execution.Args, "-s", "/tmp/settings.xml")
 
