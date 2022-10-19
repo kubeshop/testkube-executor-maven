@@ -145,44 +145,6 @@ func TestRun(t *testing.T) {
 		assert.Equal(t, testkube.ExecutionStatusPassed, result.Status)
 		assert.Len(t, result.Steps, 1)
 	})
-
-	t.Run("run maven project with copied file", func(t *testing.T) {
-		// setup
-		tempDir, _ := os.MkdirTemp("", "*")
-		os.Setenv("RUNNER_DATADIR", tempDir)
-		repoDir := filepath.Join(tempDir, "repo")
-		os.Mkdir(repoDir, 0755)
-		_ = cp.Copy("../../examples/hello-maven-settings", repoDir)
-
-		// given
-		runner := NewRunner()
-		execution := testkube.NewQueuedExecution()
-		execution.TestType = "maven/test"
-		execution.Content = &testkube.TestContent{
-			Type_: string(testkube.TestContentTypeGitDir),
-			Repository: &testkube.Repository{
-				Uri:    "someuri",
-				Branch: "main",
-			},
-		}
-		execution.Variables = map[string]testkube.Variable{
-			"wrapper": {Name: "TESTKUBE_MAVEN", Value: "true", Type_: testkube.VariableTypeBasic},
-		}
-		fileContent, err := os.ReadFile(fmt.Sprintf("%s/settings.xml", repoDir))
-		assert.NoError(t, err)
-		execution.CopyFiles = map[string]string{
-			"/tmp/settings.xml": string(fileContent),
-		}
-		execution.Args = append(execution.Args, "-s", "/tmp/settings.xml")
-
-		// when
-		result, err := runner.Run(*execution)
-
-		// then
-		assert.NoError(t, err)
-		assert.Equal(t, testkube.ExecutionStatusPassed, result.Status)
-		assert.Len(t, result.Steps, 1)
-	})
 }
 
 func TestRunErrors(t *testing.T) {
