@@ -100,8 +100,13 @@ func (r *MavenRunner) Run(execution testkube.Execution) (result testkube.Executi
 		args = append(args, "-Duser.home=/home/maven")
 	}
 
+	runPath := directory
+	if execution.Content.Repository != nil && execution.Content.Repository.WorkingDir != "" {
+		runPath = filepath.Join(r.params.Datadir, "repo", execution.Content.Repository.WorkingDir)
+	}
+
 	output.PrintEvent("Running", directory, mavenCommand, args)
-	output, err := executor.Run(directory, mavenCommand, envManager, args...)
+	output, err := executor.Run(runPath, mavenCommand, envManager, args...)
 	output = envManager.Obfuscate(output)
 
 	if err == nil {
