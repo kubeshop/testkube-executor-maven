@@ -103,7 +103,6 @@ func (r *MavenRunner) Run(execution testkube.Execution) (result testkube.Executi
 	runPath := directory
 	if execution.Content.Repository != nil && execution.Content.Repository.WorkingDir != "" {
 		runPath = filepath.Join(r.params.Datadir, "repo", execution.Content.Repository.WorkingDir)
-		args = append(args, "-pl", directory)
 	}
 
 	output.PrintEvent("Running", directory, mavenCommand, args)
