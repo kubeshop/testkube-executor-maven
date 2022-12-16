@@ -13,6 +13,7 @@ import (
 	"github.com/kubeshop/testkube/pkg/api/v1/testkube"
 	"github.com/kubeshop/testkube/pkg/executor"
 	"github.com/kubeshop/testkube/pkg/executor/output"
+	"github.com/kubeshop/testkube/pkg/executor/runner"
 	"github.com/kubeshop/testkube/pkg/executor/secret"
 )
 
@@ -174,4 +175,9 @@ func createSettingsXML(directory string, content string) (string, error) {
 	}
 
 	return settingsXML, nil
+}
+
+// GetType returns runner type
+func (r *MavenRunner) GetType() runner.Type {
+	return runner.TypeMain
 }
