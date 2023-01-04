@@ -68,9 +68,9 @@ func (r *MavenRunner) Run(execution testkube.Execution) (result testkube.Executi
 	}
 
 	envManager := secret.NewEnvManagerWithVars(execution.Variables)
-	envManager.GetVars(execution.Variables)
+	envManager.GetVars(envManager.Variables)
 	// simply set the ENVs to use during Maven execution
-	for _, env := range execution.Variables {
+	for _, env := range envManager.Variables {
 		os.Setenv(env.Name, env.Value)
 	}
 
