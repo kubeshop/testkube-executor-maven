@@ -12,9 +12,10 @@ import (
 
 	"github.com/kubeshop/testkube/pkg/api/v1/testkube"
 	"github.com/kubeshop/testkube/pkg/executor"
-	"github.com/kubeshop/testkube/pkg/executor/output"
+	outputPkg "github.com/kubeshop/testkube/pkg/executor/output"
 	"github.com/kubeshop/testkube/pkg/executor/runner"
 	"github.com/kubeshop/testkube/pkg/executor/secret"
+	"github.com/kubeshop/testkube/pkg/ui"
 )
 
 type Params struct {
@@ -22,9 +23,14 @@ type Params struct {
 }
 
 func NewRunner() *MavenRunner {
+	outputPkg.PrintLog(fmt.Sprintf("%s Preparing test runner", ui.IconTruck))
+
+	outputPkg.PrintLog(fmt.Sprintf("%s Reading environment variables...", ui.IconWorld))
 	params := Params{
 		Datadir: os.Getenv("RUNNER_DATADIR"),
 	}
+	outputPkg.PrintLog(fmt.Sprintf("%s Environment variables read successfully", ui.IconCheckMark))
+	outputPkg.PrintLog(fmt.Sprintf("RUNNER_DATADIR=\"%s\"", params.Datadir))
 
 	runner := &MavenRunner{
 		params: params,
@@ -38,14 +44,18 @@ type MavenRunner struct {
 }
 
 func (r *MavenRunner) Run(execution testkube.Execution) (result testkube.ExecutionResult, err error) {
+	outputPkg.PrintLog(fmt.Sprintf("%s Preparing for test run", ui.IconTruck))
+
 	// check that the datadir exists
 	_, err = os.Stat(r.params.Datadir)
 	if errors.Is(err, os.ErrNotExist) {
+		outputPkg.PrintLog(fmt.Sprintf("%s Datadir %s does not exist", ui.IconCross, r.params.Datadir))
 		return result, err
 	}
 
 	// the Gradle executor does not support files
 	if execution.Content.IsFile() {
+		outputPkg.PrintLog(fmt.Sprintf("%s Executor only support git-dir based tests", ui.IconCross))
 		return result.Err(fmt.Errorf("executor only support git-dir based tests")), nil
 	}
 
@@ -55,6 +65,7 @@ func (r *MavenRunner) Run(execution testkube.Execution) (result testkube.Executi
 
 	_, pomXmlErr := os.Stat(pomXml)
 	if errors.Is(pomXmlErr, os.ErrNotExist) {
+		outputPkg.PrintLog(fmt.Sprintf("%s No pom.xml found", ui.IconCross))
 		return result.Err(fmt.Errorf("no pom.xml found")), nil
 	}
 
@@ -79,10 +90,13 @@ func (r *MavenRunner) Run(execution testkube.Execution) (result testkube.Executi
 	args = append(args, execution.Args...)
 
 	if execution.VariablesFile != "" {
+		outputPkg.PrintLog(fmt.Sprintf("%s Creating settings.xml file", ui.IconWorld))
 		settingsXML, err := createSettingsXML(directory, execution.VariablesFile)
 		if err != nil {
+			outputPkg.PrintLog(fmt.Sprintf("%s Could not create settings.xml", ui.IconCross))
 			return result.Err(fmt.Errorf("could not create settings.xml")), nil
 		}
+		outputPkg.PrintLog(fmt.Sprintf("%s Successfully created settings.xml", ui.IconCheckMark))
 		args = append(args, "--settings", settingsXML)
 	}
 
@@ -106,15 +120,16 @@ func (r *MavenRunner) Run(execution testkube.Execution) (result testkube.Executi
 		runPath = filepath.Join(r.params.Datadir, "repo", execution.Content.Repository.WorkingDir)
 	}
 
-	output.PrintEvent("Running", directory, mavenCommand, args)
 	output, err := executor.Run(runPath, mavenCommand, envManager, args...)
 	output = envManager.Obfuscate(output)
 
 	if err == nil {
 		result.Status = testkube.ExecutionStatusPassed
+		outputPkg.PrintLog(fmt.Sprintf("%s Test run successful", ui.IconCheckMark))
 	} else {
 		result.Status = testkube.ExecutionStatusFailed
 		result.ErrorMessage = err.Error()
+		outputPkg.PrintLog(fmt.Sprintf("%s Test run failed: %s", ui.IconCross, err.Error()))
 		if strings.Contains(result.ErrorMessage, "exit status 1") {
 			// probably some tests have failed
 			result.ErrorMessage = "build failed with an exception"
