@@ -56,7 +56,7 @@ func (r *MavenRunner) Run(execution testkube.Execution) (result testkube.Executi
 	// the Gradle executor does not support files
 	if execution.Content.IsFile() {
 		outputPkg.PrintLog(fmt.Sprintf("%s Executor only support git-dir based tests", ui.IconCross))
-		return result.Err(fmt.Errorf("executor only support git-dir based tests")), nil
+		return *result.Err(fmt.Errorf("executor only support git-dir based tests")), nil
 	}
 
 	// check that pom.xml file exists
@@ -66,7 +66,7 @@ func (r *MavenRunner) Run(execution testkube.Execution) (result testkube.Executi
 	_, pomXmlErr := os.Stat(pomXml)
 	if errors.Is(pomXmlErr, os.ErrNotExist) {
 		outputPkg.PrintLog(fmt.Sprintf("%s No pom.xml found", ui.IconCross))
-		return result.Err(fmt.Errorf("no pom.xml found")), nil
+		return *result.Err(fmt.Errorf("no pom.xml found")), nil
 	}
 
 	// determine the Maven command to use
@@ -94,7 +94,7 @@ func (r *MavenRunner) Run(execution testkube.Execution) (result testkube.Executi
 		settingsXML, err := createSettingsXML(directory, execution.VariablesFile)
 		if err != nil {
 			outputPkg.PrintLog(fmt.Sprintf("%s Could not create settings.xml", ui.IconCross))
-			return result.Err(fmt.Errorf("could not create settings.xml")), nil
+			return *result.Err(fmt.Errorf("could not create settings.xml")), nil
 		}
 		outputPkg.PrintLog(fmt.Sprintf("%s Successfully created settings.xml", ui.IconCheckMark))
 		args = append(args, "--settings", settingsXML)
@@ -166,7 +166,7 @@ func (r *MavenRunner) Run(execution testkube.Execution) (result testkube.Executi
 	})
 
 	if err != nil {
-		return result.Err(err), nil
+		return *result.Err(err), nil
 	}
 
 	return result, nil
