@@ -39,6 +39,7 @@ func TestRun(t *testing.T) {
 			"wrapper": {Name: "TESTKUBE_MAVEN_WRAPPER", Value: "true", Type_: testkube.VariableTypeBasic},
 		}
 
+		os.Setenv("TESTKUBE_MAVEN_WRAPPER", "true")
 		// when
 		result, err := runner.Run(*execution)
 
@@ -72,6 +73,7 @@ func TestRun(t *testing.T) {
 			"wrapper": {Name: "TESTKUBE_MAVEN", Value: "true", Type_: testkube.VariableTypeBasic},
 		}
 
+		os.Setenv("TESTKUBE_MAVEN", "true")
 		// when
 		result, err := runner.Run(*execution)
 
@@ -102,6 +104,7 @@ func TestRun(t *testing.T) {
 		}
 		execution.Envs = map[string]string{"TESTKUBE_MAVEN_WRAPPER": "true"}
 
+		os.Setenv("TESTKUBE_MAVEN_WRAPPER", "true")
 		// when
 		result, err := runner.Run(*execution)
 
@@ -137,6 +140,7 @@ func TestRun(t *testing.T) {
 		assert.NoError(t, err)
 		execution.VariablesFile = string(settingsContent)
 
+		os.Setenv("TESTKUBE_MAVEN", "true")
 		// when
 		result, err := runner.Run(*execution)
 
