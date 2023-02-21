@@ -12,9 +12,9 @@ import (
 
 	"github.com/kubeshop/testkube/pkg/api/v1/testkube"
 	"github.com/kubeshop/testkube/pkg/executor"
+	"github.com/kubeshop/testkube/pkg/executor/env"
 	outputPkg "github.com/kubeshop/testkube/pkg/executor/output"
 	"github.com/kubeshop/testkube/pkg/executor/runner"
-	"github.com/kubeshop/testkube/pkg/executor/secret"
 	"github.com/kubeshop/testkube/pkg/ui"
 )
 
@@ -78,8 +78,8 @@ func (r *MavenRunner) Run(execution testkube.Execution) (result testkube.Executi
 		mavenCommand = "./mvnw"
 	}
 
-	envManager := secret.NewEnvManagerWithVars(execution.Variables)
-	envManager.GetVars(envManager.Variables)
+	envManager := env.NewManagerWithVars(execution.Variables)
+	envManager.GetReferenceVars(envManager.Variables)
 
 	// pass additional executor arguments/flags to Gradle
 	args := []string{}
@@ -117,7 +117,7 @@ func (r *MavenRunner) Run(execution testkube.Execution) (result testkube.Executi
 	}
 
 	output, err := executor.Run(runPath, mavenCommand, envManager, args...)
-	output = envManager.Obfuscate(output)
+	output = envManager.ObfuscateSecrets(output)
 
 	if err == nil {
 		result.Status = testkube.ExecutionStatusPassed
