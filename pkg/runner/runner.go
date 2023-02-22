@@ -12,6 +12,7 @@ import (
 
 	"github.com/kubeshop/testkube/pkg/api/v1/testkube"
 	"github.com/kubeshop/testkube/pkg/executor"
+	"github.com/kubeshop/testkube/pkg/executor/content"
 	"github.com/kubeshop/testkube/pkg/executor/env"
 	outputPkg "github.com/kubeshop/testkube/pkg/executor/output"
 	"github.com/kubeshop/testkube/pkg/executor/runner"
@@ -33,30 +34,30 @@ func NewRunner() *MavenRunner {
 	outputPkg.PrintLog(fmt.Sprintf("RUNNER_DATADIR=\"%s\"", params.Datadir))
 
 	runner := &MavenRunner{
-		params: params,
+		params:  params,
+		fetcher: content.NewFetcher(""),
 	}
 
 	return runner
 }
 
 type MavenRunner struct {
-	params Params
+	params  Params
+	fetcher content.ContentFetcher
 }
 
 func (r *MavenRunner) Run(execution testkube.Execution) (result testkube.ExecutionResult, err error) {
 	outputPkg.PrintLog(fmt.Sprintf("%s Preparing for test run", ui.IconTruck))
+	err = r.Validate(execution)
+	if err != nil {
+		return result, err
+	}
 
 	// check that the datadir exists
 	_, err = os.Stat(r.params.Datadir)
 	if errors.Is(err, os.ErrNotExist) {
 		outputPkg.PrintLog(fmt.Sprintf("%s Datadir %s does not exist", ui.IconCross, r.params.Datadir))
 		return result, err
-	}
-
-	// the Gradle executor does not support files
-	if execution.Content.IsFile() {
-		outputPkg.PrintLog(fmt.Sprintf("%s Executor only support git-dir based tests", ui.IconCross))
-		return *result.Err(fmt.Errorf("executor only support git-dir based tests")), nil
 	}
 
 	// check that pom.xml file exists
@@ -191,4 +192,36 @@ func createSettingsXML(directory string, content string) (string, error) {
 // GetType returns runner type
 func (r *MavenRunner) GetType() runner.Type {
 	return runner.TypeMain
+}
+
+// Validate checks if Execution has valid data in context of Maven executor
+func (r *MavenRunner) Validate(execution testkube.Execution) error {
+
+	if execution.Content == nil {
+		outputPkg.PrintLog(fmt.Sprintf("%s Can't find any content to run in execution data", ui.IconCross))
+		return fmt.Errorf("can't find any content to run in execution data: %+v", execution)
+	}
+
+	if execution.Content.Repository == nil {
+		outputPkg.PrintLog(fmt.Sprintf("%s Maven executor handles only repository based tests, but repository is nil", ui.IconCross))
+		return fmt.Errorf("maven executor handles only repository based tests, but repository is nil")
+	}
+
+	if execution.Content.Repository.Branch == "" && execution.Content.Repository.Commit == "" {
+		outputPkg.PrintLog(fmt.Sprintf("%s Can't find branch or commit in params must use one or the other, repo %+v", ui.IconCross, execution.Content.Repository))
+		return fmt.Errorf("can't find branch or commit in params must use one or the other, repo:%+v", execution.Content.Repository)
+	}
+
+	contentType, err := r.fetcher.CalculateGitContentType(*execution.Content.Repository)
+	if err != nil {
+		outputPkg.PrintLog(fmt.Sprintf("%s Can't detect git content type: %+v", ui.IconCross, err))
+		return err
+	}
+
+	if contentType != string(testkube.TestContentTypeGitDir) {
+		outputPkg.PrintLog(fmt.Sprintf("%s passing maven test as single file not implemented yet", ui.IconCross))
+		return fmt.Errorf("passing maven test as single file not implemented yet")
+	}
+
+	return nil
 }
