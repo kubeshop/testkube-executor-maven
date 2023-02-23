@@ -12,7 +12,6 @@ import (
 
 	"github.com/kubeshop/testkube/pkg/api/v1/testkube"
 	"github.com/kubeshop/testkube/pkg/executor"
-	"github.com/kubeshop/testkube/pkg/executor/content"
 	"github.com/kubeshop/testkube/pkg/executor/env"
 	outputPkg "github.com/kubeshop/testkube/pkg/executor/output"
 	"github.com/kubeshop/testkube/pkg/executor/runner"
@@ -34,16 +33,14 @@ func NewRunner() *MavenRunner {
 	outputPkg.PrintLog(fmt.Sprintf("RUNNER_DATADIR=\"%s\"", params.Datadir))
 
 	runner := &MavenRunner{
-		params:  params,
-		fetcher: content.NewFetcher(""),
+		params: params,
 	}
 
 	return runner
 }
 
 type MavenRunner struct {
-	params  Params
-	fetcher content.ContentFetcher
+	params Params
 }
 
 func (r *MavenRunner) Run(execution testkube.Execution) (result testkube.ExecutionResult, err error) {
@@ -62,6 +59,17 @@ func (r *MavenRunner) Run(execution testkube.Execution) (result testkube.Executi
 
 	// check that pom.xml file exists
 	directory := filepath.Join(r.params.Datadir, "repo", execution.Content.Repository.Path)
+
+	fileInfo, err := os.Stat(directory)
+	if err != nil {
+		return result, err
+	}
+
+	if !fileInfo.IsDir() {
+		outputPkg.PrintLog(fmt.Sprintf("%s passing maven test as single file not implemented yet", ui.IconCross))
+		return result, fmt.Errorf("passing maven test as single file not implemented yet")
+	}
+
 	pomXml := filepath.Join(directory, "pom.xml")
 
 	_, pomXmlErr := os.Stat(pomXml)
@@ -210,17 +218,6 @@ func (r *MavenRunner) Validate(execution testkube.Execution) error {
 	if execution.Content.Repository.Branch == "" && execution.Content.Repository.Commit == "" {
 		outputPkg.PrintLog(fmt.Sprintf("%s Can't find branch or commit in params must use one or the other, repo %+v", ui.IconCross, execution.Content.Repository))
 		return fmt.Errorf("can't find branch or commit in params must use one or the other, repo:%+v", execution.Content.Repository)
-	}
-
-	contentType, err := r.fetcher.CalculateGitContentType(*execution.Content.Repository)
-	if err != nil {
-		outputPkg.PrintLog(fmt.Sprintf("%s Can't detect git content type: %+v", ui.IconCross, err))
-		return err
-	}
-
-	if contentType != string(testkube.TestContentTypeGitDir) {
-		outputPkg.PrintLog(fmt.Sprintf("%s passing maven test as single file not implemented yet", ui.IconCross))
-		return fmt.Errorf("passing maven test as single file not implemented yet")
 	}
 
 	return nil

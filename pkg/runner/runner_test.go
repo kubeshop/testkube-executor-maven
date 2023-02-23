@@ -24,9 +24,6 @@ func TestRun(t *testing.T) {
 
 		// given
 		runner := NewRunner()
-		runner.fetcher = &MockFetcher{
-			FetchCalculateContentTypeFn: func(repo testkube.Repository) (string, error) { return string(testkube.TestContentTypeGitDir), nil },
-		}
 		execution := testkube.NewQueuedExecution()
 		execution.TestType = "maven/test"
 		execution.Content = &testkube.TestContent{
@@ -61,9 +58,6 @@ func TestRun(t *testing.T) {
 
 		// given
 		runner := NewRunner()
-		runner.fetcher = &MockFetcher{
-			FetchCalculateContentTypeFn: func(repo testkube.Repository) (string, error) { return string(testkube.TestContentTypeGitDir), nil },
-		}
 		execution := testkube.NewQueuedExecution()
 		execution.TestType = "maven/project"
 		execution.Content = &testkube.TestContent{
@@ -98,9 +92,6 @@ func TestRun(t *testing.T) {
 
 		// given
 		runner := NewRunner()
-		runner.fetcher = &MockFetcher{
-			FetchCalculateContentTypeFn: func(repo testkube.Repository) (string, error) { return string(testkube.TestContentTypeGitDir), nil },
-		}
 		execution := testkube.NewQueuedExecution()
 		execution.TestType = "maven/test"
 		execution.Content = &testkube.TestContent{
@@ -132,9 +123,6 @@ func TestRun(t *testing.T) {
 
 		// given
 		runner := NewRunner()
-		runner.fetcher = &MockFetcher{
-			FetchCalculateContentTypeFn: func(repo testkube.Repository) (string, error) { return string(testkube.TestContentTypeGitDir), nil },
-		}
 		execution := testkube.NewQueuedExecution()
 		execution.TestType = "maven/test"
 		execution.Content = &testkube.TestContent{
@@ -169,9 +157,6 @@ func TestRunErrors(t *testing.T) {
 
 		// given
 		runner := NewRunner()
-		runner.fetcher = &MockFetcher{
-			FetchCalculateContentTypeFn: func(repo testkube.Repository) (string, error) { return string(testkube.TestContentTypeGitDir), nil },
-		}
 		execution := testkube.NewQueuedExecution()
 
 		// when
@@ -187,9 +172,6 @@ func TestRunErrors(t *testing.T) {
 
 		// given
 		runner := NewRunner()
-		runner.fetcher = &MockFetcher{
-			FetchCalculateContentTypeFn: func(repo testkube.Repository) (string, error) { return string(testkube.TestContentTypeGitFile), nil },
-		}
 		execution := testkube.NewQueuedExecution()
 		execution.TestType = "maven/test"
 		execution.Content = testkube.NewStringTestContent("")
@@ -211,9 +193,6 @@ func TestRunErrors(t *testing.T) {
 
 		// given
 		runner := NewRunner()
-		runner.fetcher = &MockFetcher{
-			FetchCalculateContentTypeFn: func(repo testkube.Repository) (string, error) { return string(testkube.TestContentTypeGitDir), nil },
-		}
 		execution := testkube.NewQueuedExecution()
 		execution.TestType = "maven/test"
 		execution.Content = &testkube.TestContent{
