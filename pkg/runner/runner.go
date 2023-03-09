@@ -45,6 +45,10 @@ type MavenRunner struct {
 
 func (r *MavenRunner) Run(execution testkube.Execution) (result testkube.ExecutionResult, err error) {
 	outputPkg.PrintLog(fmt.Sprintf("%s Preparing for test run", ui.IconTruck))
+	err = r.Validate(execution)
+	if err != nil {
+		return result, err
+	}
 
 	// check that the datadir exists
 	_, err = os.Stat(r.params.Datadir)
@@ -53,14 +57,19 @@ func (r *MavenRunner) Run(execution testkube.Execution) (result testkube.Executi
 		return result, err
 	}
 
-	// the Gradle executor does not support files
-	if execution.Content.IsFile() {
-		outputPkg.PrintLog(fmt.Sprintf("%s Executor only support git-dir based tests", ui.IconCross))
-		return *result.Err(fmt.Errorf("executor only support git-dir based tests")), nil
-	}
-
 	// check that pom.xml file exists
 	directory := filepath.Join(r.params.Datadir, "repo", execution.Content.Repository.Path)
+
+	fileInfo, err := os.Stat(directory)
+	if err != nil {
+		return result, err
+	}
+
+	if !fileInfo.IsDir() {
+		outputPkg.PrintLog(fmt.Sprintf("%s passing maven test as single file not implemented yet", ui.IconCross))
+		return result, fmt.Errorf("passing maven test as single file not implemented yet")
+	}
+
 	pomXml := filepath.Join(directory, "pom.xml")
 
 	_, pomXmlErr := os.Stat(pomXml)
@@ -191,4 +200,25 @@ func createSettingsXML(directory string, content string) (string, error) {
 // GetType returns runner type
 func (r *MavenRunner) GetType() runner.Type {
 	return runner.TypeMain
+}
+
+// Validate checks if Execution has valid data in context of Maven executor
+func (r *MavenRunner) Validate(execution testkube.Execution) error {
+
+	if execution.Content == nil {
+		outputPkg.PrintLog(fmt.Sprintf("%s Can't find any content to run in execution data", ui.IconCross))
+		return fmt.Errorf("can't find any content to run in execution data: %+v", execution)
+	}
+
+	if execution.Content.Repository == nil {
+		outputPkg.PrintLog(fmt.Sprintf("%s Maven executor handles only repository based tests, but repository is nil", ui.IconCross))
+		return fmt.Errorf("maven executor handles only repository based tests, but repository is nil")
+	}
+
+	if execution.Content.Repository.Branch == "" && execution.Content.Repository.Commit == "" {
+		outputPkg.PrintLog(fmt.Sprintf("%s Can't find branch or commit in params must use one or the other, repo %+v", ui.IconCross, execution.Content.Repository))
+		return fmt.Errorf("can't find branch or commit in params must use one or the other, repo:%+v", execution.Content.Repository)
+	}
+
+	return nil
 }
